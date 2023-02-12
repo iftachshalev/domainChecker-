@@ -16,17 +16,19 @@ app.get("/", function(req, res) {
 
 app.post("/sendurl", function(req, res) {
   var url = req.body.url;
-  console.log(url);
-  python(url);
+  runPythonScript(url);
   res.redirect("/");
 });
   
-function python(url) {
-    var process = spawn('python',["./app.py",
-                            url] );
-    process.stdout.on('data', function(data) {
-      console.log(data.toString());
-    } )
+function runPythonScript(url) {
+  var process = spawn('python', ["./app.py", url]);
+  process.stdout.on('data', function(data) {
+      var pyOutput = JSON.parse(data.toString());
+      console.log(pyOutput[0]);
+  });
+  process.stderr.on('data', function(error) {
+      console.error(error.toString());
+  });
 }
 
 const port = 3000;

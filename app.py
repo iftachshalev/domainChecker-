@@ -1,6 +1,7 @@
 import sys, requests, json
 import time
-
+print(json.dumps([1, "324ffff"]))
+sys.exit()
 # header for all coms
 headers = {
     "Content-Type": "application/json"
@@ -9,7 +10,7 @@ headers = {
 # sending link to api
 params_ = {
     "apiKey": "emgn85jkankhknmwpjotm1jgkt8abedovkk54zqqw05trqec9cts3mf1x70d2haj",
-    "urlInfo": {"url": "https://www.twitch.tv"}
+    "urlInfo": {"url": sys.argv[1]}
     }
 
 response_job = requests.post("https://developers.bolster.ai/api/neo/scan/", headers=headers, data=json.dumps(params_))
@@ -17,7 +18,7 @@ res_text = json.loads(response_job.text)
 
 # checking if the API request was successful
 if response_job.status_code != 200:
-    print([0, f"Error sending API request:{response_job.text}"]) #0 => code for error
+    print(json.dumps([0, f"Error sending API request:{response_job.text}"])) #0 => code for error
     sys.exit()
 
 # getting results back
@@ -37,8 +38,8 @@ while True:
     response_final = requests.post("https://developers.bolster.ai/api/neo/scan/status", headers=headers, data=json.dumps(params_))
     res_final_text = json.loads(response_final.text)
     if res_final_text["status"] == "DONE":
-        print([1, res_final_text]) #1 => code for successful results
+        print(json.dumps([1, res_final_text])) #1 => code for successful results
         break
     if time.time() - start_time > max_wait_time:
-        print([0, f"Error: API request timed out after {max_wait_time} seconds"]) #0 => code for error
+        print(json.dumps([0, f"Error: API request timed out after {max_wait_time} seconds"])) #0 => code for error
         sys.exit()
