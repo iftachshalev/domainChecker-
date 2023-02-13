@@ -1,45 +1,57 @@
 import sys, requests, json
-import time
-print(json.dumps([1, "324ffff"]))
-sys.exit()
-# header for all coms
-headers = {
-    "Content-Type": "application/json"
-}
+from difflib import SequenceMatcher
+from urllib.parse import urlsplit
 
-# sending link to api
-params_ = {
-    "apiKey": "emgn85jkankhknmwpjotm1jgkt8abedovkk54zqqw05trqec9cts3mf1x70d2haj",
-    "urlInfo": {"url": sys.argv[1]}
-    }
+s = SequenceMatcher()
+url = sys.argv[1]
+max_trust = 0.9422
 
-response_job = requests.post("https://developers.bolster.ai/api/neo/scan/", headers=headers, data=json.dumps(params_))
-res_text = json.loads(response_job.text)
+# gets the black list from memory
+black_list = []
+with open('black list.txt', encoding='utf-8') as my_file:
+    for line in my_file:
+        black_list.append(line.strip())
 
-# checking if the API request was successful
-if response_job.status_code != 200:
-    print(json.dumps([0, f"Error sending API request:{response_job.text}"])) #0 => code for error
+# gets the full url in case of bit.ly
+if url[:6] == 'bit.ly':
+    url = requests.head("http://"+url).headers["location"]
+
+# checks if the url is in the black list
+if url in black_list:
+    print(json.dumps([1])) # 1 = defenatly a phishing using the black list
     sys.exit()
 
-# getting results back
-params_ = {
-    "apiKey": "emgn85jkankhknmwpjotm1jgkt8abedovkk54zqqw05trqec9cts3mf1x70d2haj",
-    "jobID": res_text["jobID"], 
-    "insights": True
-    }
+# if the url isn't in the black list its gonna be making a few security checks:
 
-# setting a maximum wait time for the API to process the request
-max_wait_time = 30 # seconds
-start_time = time.time()
-sleep_time = 0.5
+#checks for https
+if url[4] != "s":
+    print(json.dumps([2, "this website does not use https!"])) # 2 = url doesn't use https
+    sys.exit()
 
-while True:
-    time.sleep(sleep_time) # wait <sleep_time> seconds between each request
-    response_final = requests.post("https://developers.bolster.ai/api/neo/scan/status", headers=headers, data=json.dumps(params_))
-    res_final_text = json.loads(response_final.text)
-    if res_final_text["status"] == "DONE":
-        print(json.dumps([1, res_final_text])) #1 => code for successful results
-        break
-    if time.time() - start_time > max_wait_time:
-        print(json.dumps([0, f"Error: API request timed out after {max_wait_time} seconds"])) #0 => code for error
-        sys.exit()
+# loads white list of trusted websites from memory
+white_list = []
+with open('white list.txt', encoding='utf-8') as my_file:
+    for line in my_file:
+        white_list.append(line.strip())
+
+# checks if url is in the white list
+if url in white_list:
+    print(json.dumps([0])) # 1 = defenatly a phishing using the black list
+    sys.exit()
+
+# checks for similar urls in the white list
+for i in range(len(white_list)):
+    to_compare = [url, white_list[i]]
+    for j in range(len(to_compare)):
+        x = to_compare[j]
+        s.set_seq1(x)
+        for k in range(j+1, len(to_compare)):
+            y = to_compare[k]
+            s.set_seq2(y)
+            end_val = s.ratio()
+            if end_val > max_trust:
+                real_website = urlsplit(white_list[i]).netloc
+                print(json.dumps([2, f"this website might be trying to look like: {real_website}!"]))
+                sys.exit()
+
+print(json.dumps("0")) # 0 = probably a safe site
