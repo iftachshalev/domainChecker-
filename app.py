@@ -21,15 +21,15 @@ if url in black_list:
     print(json.dumps([1])) # 1 = defenatly a phishing using the black list
     sys.exit()
 
-# change url to root
-url = "https://" + url.split("/")[2]
-
 # if the url isn't in the black list its gonna be making a few security checks:
 
 #checks for https
 if url[4] != "s":
     print(json.dumps([2, "this website does not use https!"])) # 2 = url doesn't use https
     sys.exit()
+
+# change url to root
+url = "https://" + url.split("/")[2]
 
 # loads white list of trusted websites from memory
 white_list = []
@@ -59,7 +59,7 @@ for i in range(len(white_list)):
     
     # checks for home and about page
     try:
-        response = requests.get(url + "about")
+        # response = requests.get(url + "about")
         response = requests.get(url)
     except:
         print(json.dumps([2, f"this website does not have home/about page like most of the websits!"]))
