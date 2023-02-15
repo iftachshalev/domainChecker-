@@ -6,8 +6,9 @@ s = SequenceMatcher()
 url = sys.argv[1]
 max_trust = 0.9422
 
-# change url to root
-url = "https://" + url.split("/")[2]
+# gets the full url in case of bit.ly
+if url[:6] == 'bit.ly':
+    url = requests.head("http://"+url).headers["location"]
 
 # gets the black list from memory
 black_list = []
@@ -15,14 +16,13 @@ with open('black list.txt', encoding='utf-8') as my_file:
     for line in my_file:
         black_list.append(line.strip())
 
-# gets the full url in case of bit.ly
-if url[:6] == 'bit.ly':
-    url = requests.head("http://"+url).headers["location"]
-
 # checks if the url is in the black list
 if url in black_list:
     print(json.dumps([1])) # 1 = defenatly a phishing using the black list
     sys.exit()
+
+# change url to root
+url = "https://" + url.split("/")[2]
 
 # if the url isn't in the black list its gonna be making a few security checks:
 
