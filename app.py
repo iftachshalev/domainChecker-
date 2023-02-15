@@ -6,6 +6,9 @@ s = SequenceMatcher()
 url = sys.argv[1]
 max_trust = 0.9422
 
+# change url to root
+url = "https://" + url.split("/")[2]
+
 # gets the black list from memory
 black_list = []
 with open('black list.txt', encoding='utf-8') as my_file:
@@ -34,9 +37,6 @@ with open('white list.txt', encoding='utf-8') as my_file:
     for line in my_file:
         white_list.append(line.strip())
 
-# change url to root
-url = "https://" + url.split("/")[2]
-
 # checks if url is in the white list
 if url in white_list:
     print(json.dumps([0])) # 1 = defenatly a phishing using the black list
@@ -56,5 +56,13 @@ for i in range(len(white_list)):
                 real_website = urlsplit(white_list[i]).netloc
                 print(json.dumps([2, f"this website might be trying to look like: {real_website}!"]))
                 sys.exit()
+    
+    # checks for home and about page
+    try:
+        response = requests.get(url + "about")
+        response = requests.get(url)
+    except:
+        print(json.dumps([2, f"this website does not have home/about page like most of the websits!"]))
+        sys.exit()
 
 print(json.dumps("0")) # 0 = probably a safe site
