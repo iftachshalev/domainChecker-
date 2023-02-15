@@ -34,6 +34,9 @@ with open('white list.txt', encoding='utf-8') as my_file:
     for line in my_file:
         white_list.append(line.strip())
 
+# change url to root
+url = "https://" + url.split("/")[2]
+
 # checks if url is in the white list
 if url in white_list:
     print(json.dumps([0])) # 1 = defenatly a phishing using the black list
