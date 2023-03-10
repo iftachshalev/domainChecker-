@@ -57,12 +57,12 @@ for i in range(len(white_list)):
                 print(json.dumps([2, f"this website might be trying to look like: {real_website}!"]))
                 sys.exit()
     
-    # checks for home and about page
-    try:
-        # response = requests.get(url + "about")
-        response = requests.get(url)
-    except:
-        print(json.dumps([2, f"this website does not have home/about page like most of the websits!"]))
-        sys.exit()
+# checks for home and about page
+try:
+    response = requests.get(url + "about")
+    response = requests.get(url)
+except:
+    print(json.dumps([2, f"this website does not have home/about page like most of the websits!"]))
+    sys.exit()
 
 print(json.dumps("0")) # 0 = probably a safe site
